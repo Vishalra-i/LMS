@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from 'uuid';
+
 
 const userSchema = mongoose.Schema({
     fullName: {
@@ -15,10 +17,6 @@ const userSchema = mongoose.Schema({
         type : String ,
         unique : true ,
         match : [/.+\@.+\../, "Please enter a valid email"]
-    },
-    username : {
-        required : true ,
-        type : String ,
     },
     password : {
         required : true ,
@@ -39,7 +37,7 @@ const userSchema = mongoose.Schema({
         enum : ["USER", "ADMIN"] ,
         default : "USER"
     },
-    forgotPasswordToke : String ,
+    forgotPasswordToken : String ,
     forgotPasswordExpiry : Date
 })
 
@@ -59,14 +57,24 @@ userSchema.methods.isAdmin = function(){
     return this.role === "ADMIN"
 }
 
+userSchema.methods.generateResetToken = function() {
+    const resetToken = uuidv4();
+
+    this.forgotPasswordToken = resetToken;
+    this.forgotPasswordExpiry = Date.now() + 15 * 60 * 1000; // Token expires in 15 minutes
+
+    return resetToken;
+};
+
 userSchema.methods.generateJwtToken = function(){
     return jwt.sign({
         _id : this._id ,
         email : this.email ,
         fullName : this.fullName
-    }),
+    },
     process.env.JWT_SECRET ,
     {expiresIn : process.env.JWT_EXPIRY}
+    )
 }
 
 

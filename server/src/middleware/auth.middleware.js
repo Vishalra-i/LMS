@@ -1,11 +1,10 @@
-import { User } from '../model/User.model';
-import {ApiError} from '../utils/ApiError'
-import * as jwt from 'jsonwebtoken';
-import * as next from 'next';
-import asynchandler  from '../utils/asynchandler';
+import { User } from '../model/User.model.js';
+import {ApiError} from '../utils/ApiError.js'
+import jwt from 'jsonwebtoken';
+import asynchandler  from '../utils/asynchandler.js';
 
 const isLoggedin = asynchandler(async (req,res,next)=>{
-       const token = req.cookies?.accessToken || req.headers("Authorization")?.replace("Bearer ", "") ;
+       const token = req.cookies?.token || req.headers("Authorization")?.replace("Bearer ", "") ;
       
        if(!token){
            return res.status(401).json({message: "Unauthorized request"})
@@ -25,3 +24,26 @@ const isLoggedin = asynchandler(async (req,res,next)=>{
 
 
 export default isLoggedin;
+
+
+// Middleware to check if user has an active subscription or not
+export const authorizeSubscribers = asynchandler(async (req, _res, next) => {
+    // If user is not admin or does not have an active subscription then error else pass
+    if (req.user.role !== "ADMIN" && req.user.subscription.status !== "active") {
+      return next(new AppError("Please subscribe to access this route.", 403));
+    }
+  
+    next();
+  });
+
+  // Middleware to check if user is admin or not
+export const authorizeRoles = (...roles) =>
+    asynchandler(async (req, _res, next) => {
+      if (!roles.includes(req.user.role)) {
+        return next(
+          new AppError("You do not have permission to view this route", 403)
+        );
+      }
+  
+      next();
+});
