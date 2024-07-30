@@ -6,6 +6,7 @@ import {
   deleteCourseLecture,
   getCourseLecture,
 } from "../../Redux/lectureSlice";
+import { AiFillDelete } from "react-icons/ai";
 
 const DisplayLectures = () => {
   const dispatch = useDispatch();
@@ -20,11 +21,10 @@ const DisplayLectures = () => {
   const handleLectureDelete = async (courseId, lectureId) => {
     try {
       if (!courseId || !lectureId) {
-        console.error("Invalid courseId or lectureId " + "courseid:: " + courseId + '  lectureId ::' + lectureId);
         return;
       }
       const data = { courseId, lectureId };
-      await dispatch(deleteCourseLecture(data));
+       dispatch(deleteCourseLecture(data));
       // await dispatch(getCourseLecture())
     } catch (error) {
       console.log(error);
@@ -33,7 +33,7 @@ const DisplayLectures = () => {
 
   useEffect(() => {
     (async () => {
-      await dispatch(getCourseLecture(courseDetails?._id));
+       dispatch(getCourseLecture(courseDetails?._id));
     })();
   }, [dispatch, courseDetails]);
 
@@ -41,7 +41,7 @@ const DisplayLectures = () => {
     <Layout>
       <div className="flex flex-col gap-10 items-center justify-center min-h-[90vh] py-10 text-white mx-[5%]">
         <div className="flex flex-col md:flex-row gap-10 w-full">
-          <div className="space-y-5 w-full md:w-2/3 p-4 bg-gray-800 rounded-lg shadow-lg">
+          <div className="space-y-5 w-full md:w-2/3 p-4 bg-gray-800  rounded-lg shadow-lg">
             <video
               className="object-fill rounded-lg w-full"
               src={lectures && lectures[currentVideoIndex]?.lecture?.secure_url}
@@ -98,7 +98,7 @@ const DisplayLectures = () => {
                       }
                       className="btn-primary px-4 py-2 rounded-md font-semibold text-sm bg-red-500 hover:bg-red-600 transition"
                     >
-                      Delete Lecture
+                      <AiFillDelete/>
                     </button>
                   )}
                 </li>

@@ -18,7 +18,6 @@ export const getAllCourses = createAsyncThunk("/course/get", async () => {
     });
 
     const response = await res;
-    console.log(response);
 
     return response.data.data.courses;
   } catch (error) {
