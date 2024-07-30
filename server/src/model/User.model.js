@@ -32,6 +32,10 @@ const userSchema = mongoose.Schema({
             type : String
         }
     } ,
+    subscription: {
+        id: String,
+        status: String,
+    },
     role : {
         type : String ,
         enum : ["USER", "ADMIN"] ,

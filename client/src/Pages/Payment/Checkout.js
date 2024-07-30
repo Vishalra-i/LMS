@@ -9,6 +9,8 @@ import {
 } from "../../Redux/razorpaySlice";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { handlePaymentSuccess } from '../../Redux/authSlice';
+
 
 const Checkout = () => {
   const dispatch = useDispatch();
@@ -32,7 +34,7 @@ const Checkout = () => {
 
     // checking for empty payment credential
     if (!razorPayKey || !subscription_id) {
-      toast.error("Payment server is down , please try again later");
+      toast.error("Payment server is down, please try again later.");
       return;
     }
 
@@ -52,11 +54,18 @@ const Checkout = () => {
 
         // verifying the payment
         const res = await dispatch(verifyUserPayment(paymentDetails));
+        console.log("2" + res);
+        console.log("1" + isPaymentVerified);
 
         // redirecting the user according to the verification status
-        !isPaymentVerified
-          ? navigate("/checkout/success")
-          : navigate("/checkout/fail");
+        if (isPaymentVerified) {
+          dispatch(handlePaymentSuccess());
+          toast.success("Payment verified successfully");
+          navigate("/checkout/success");
+        } else {
+          toast.error("Payment verification failed");
+          navigate("/checkout/fail");
+        }
       },
       prefill: {
         name: userData.fullName,
@@ -75,14 +84,14 @@ const Checkout = () => {
       await dispatch(getRazorPayId());
       await dispatch(purchaseCourseBundle());
     })();
-  }, []);
+  }, [dispatch]);
 
   return (
     <Layout>
       {/* checkout page container */}
       <form
         onSubmit={handleSubscription}
-        className="min-h-screen flex items-center justify-center  text-gray-800"
+        className="min-h-screen flex items-center justify-center text-gray-800"
       >
         {/* checkout card */}
         <div className="w-full max-w-md bg-white rounded-lg shadow-lg overflow-hidden">

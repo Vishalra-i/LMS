@@ -23,8 +23,10 @@ router
     upload.single('thumbnail'),
     createCourse
   )
-  .delete(isLoggedin, authorizeRoles('ADMIN'), removeLectureFromCourse);
 
+router.route('/:courseId/lectures/:lectureId') // Change to use parameters
+  .delete(isLoggedin, authorizeRoles('ADMIN'), removeLectureFromCourse);
+  
 router
   .route('/:id')
   .get(isLoggedin, authorizeSubscribers, getLecturesByCourseId) // Added authorizeSubscribers to check if user is admin or subscribed if not then forbid the access to the lectures

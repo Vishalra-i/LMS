@@ -100,7 +100,6 @@ export const addLectureToCourseById = asyncHandler(async (req, res, next) => {
       }
     
   }
-
   course.lectures.push({ title, description, lecture: lectureData });
   course.numberOfLectures = course.lectures.length;
   await course.save();
@@ -114,7 +113,7 @@ export const addLectureToCourseById = asyncHandler(async (req, res, next) => {
  * @ACCESS Private (Admin only)
  */
 export const removeLectureFromCourse = asyncHandler(async (req, res, next) => {
-  const { courseId, lectureId } = req.query;
+  const { courseId, lectureId } = req.params;
 
   if (!courseId || !lectureId) {
     throw new ApiError(400, 'Course ID and Lecture ID are required');
@@ -132,12 +131,18 @@ export const removeLectureFromCourse = asyncHandler(async (req, res, next) => {
     throw new ApiError(404, 'Lecture does not exist.');
   }
 
-  await deleteOnCloudnary(course.lectures[lectureIndex].lecture.public_id);
+  
+  const result = await deleteOnCloudnary(course.lectures[lectureIndex].lecture.public_id);
+  if (!result) {
+    throw new ApiError(400, 'File not deleted, please try again');
+  }
   course.lectures.splice(lectureIndex, 1);
   course.numberOfLectures = course.lectures.length;
   await course.save();
 
-  res.status(200).json(new ApiResponse(200, {}, 'Course lecture removed successfully'));
+  res
+  .status(200)
+  .json(new ApiResponse(200, {}, 'Course lecture removed successfully'));
 });
 
 /**

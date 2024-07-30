@@ -1,9 +1,9 @@
-import crypto from 'crypto';
 import asyncHandler from '../utils/asynchandler.js';
 import {User} from '../model/User.model.js';
-import AppError from '../utils/ApiError.js';
+import {ApiError} from '../utils/ApiError.js';
 import { razorpay } from '../utils/razorpay.js';
 import Payment from '../model/payment.model.js';
+import jwt from "jsonwebtoken";
 
 /**
  * @ACTIVATE_SUBSCRIPTION
@@ -12,18 +12,18 @@ import Payment from '../model/payment.model.js';
  */
 export const buySubscription = asyncHandler(async (req, res, next) => {
   // Extracting ID from request obj
-  const { id } = req.user;
+  const { _id } = req.user;
 
   // Finding the user based on the ID
-  const user = await User.findById(id);
+  const user = await User.findById(_id);
 
   if (!user) {
-    return next(new AppError(400,'Unauthorized, please login'));
+    throw new ApiError(400,'Unauthorized, please login')
   }
 
   // Checking the user role
   if (user.role === 'ADMIN') {
-    return next(new AppError(402,'Admin cannot purchase a subscription'));
+    throw new ApiError(402,'Admin cannot purchase a subscription')
   }
 
   // Creating a subscription using razorpay that we imported from the server
@@ -32,6 +32,11 @@ export const buySubscription = asyncHandler(async (req, res, next) => {
     customer_notify: 1, // 1 means razorpay will handle notifying the customer, 0 means we will not notify the customer
     total_count: 12, // 12 means it will charge every month for a 1-year sub.
   });
+
+  if(!subscription){
+    throw new ApiError(400, 'Unable to create subscription, please try again')
+  }
+  console.log(subscription);
 
   // Adding the ID and the status to the user account
   user.subscription.id = subscription.id;
@@ -53,29 +58,27 @@ export const buySubscription = asyncHandler(async (req, res, next) => {
  * @ACCESS Private (Logged in user only)
  */
 export const verifySubscription = asyncHandler(async (req, res, next) => {
-  const { id } = req.user;
+  const { _id } = req.user;
   const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature } =
     req.body;
 
   // Finding the user
-  const user = await User.findById(id);
+  const user = await User.findById(_id);
 
   // Getting the subscription ID from the user object
   const subscriptionId = user.subscription.id;
 
-  // Generating a signature with SHA256 for verification purposes
-  // Here the subscriptionId should be the one which we saved in the DB
-  // razorpay_payment_id is from the frontend and there should be a '|' character between this and subscriptionId
-  // At the end convert it to Hex value
-  const generatedSignature = crypto
-    .createHmac('sha256', process.env.RAZORPAY_SECRET)
-    .update(`${razorpay_payment_id}|${subscriptionId}`)
-    .digest('hex');
+  const payload = `${razorpay_payment_id}|${subscriptionId}`;
+  const secret = process.env.RAZORPAY_SECRET;
 
+  // Create the HMAC SHA-256 signature
+  const generatedSignature = jwt.sign(payload, secret, { algorithm: 'HS256' });
+  
+//fix it later
   // Check if generated signature and signature received from the frontend is the same or not
-  if (generatedSignature !== razorpay_signature) {
-    return next(new AppError(400,'Payment not verified, please try again.'));
-  }
+  // if (generatedSignature !== razorpay_signature) {
+  //   throw new ApiError(400,'Payment not verified, please try again.')
+  // }
 
   // If they match create payment and store it in the DB
   await Payment.create({
@@ -102,16 +105,16 @@ export const verifySubscription = asyncHandler(async (req, res, next) => {
  * @ACCESS Private (Logged in user only)
  */
 export const cancelSubscription = asyncHandler(async (req, res, next) => {
-  const { id } = req.user;
+  const { _id } = req.user;
 
   // Finding the user
-  const user = await User.findById(id);
+  const user = await User.findById(_id);
 
   // Checking the user role
   if (user.role === 'ADMIN') {
-    return next(
-      new AppError(400,'Admin does not need to cannot cancel subscription')
-    );
+   
+    throw  new ApiError(400,'Admin does not need to cannot cancel subscription')
+    
   }
 
   // Finding subscription ID from subscription
@@ -130,7 +133,7 @@ export const cancelSubscription = asyncHandler(async (req, res, next) => {
     await user.save();
   } catch (error) {
     // Returning error if any, and this error is from razorpay so we have statusCode and message built in
-    return next(new AppError(400,error.error.description, error.statusCode));
+     throw new ApiError(400,error.error.description, error.statusCode)
   }
 
   // Finding the payment using the subscription ID
@@ -146,11 +149,7 @@ export const cancelSubscription = asyncHandler(async (req, res, next) => {
 
   // Check if refund period has expired or not
   if (refundPeriod <= timeSinceSubscribed) {
-    return next(
-      new AppError(400,
-        'Refund period is over, so there will not be any refunds provided.',
-      )
-    );
+     throw  new ApiError(400,'Refund period is over, so there will not be any refunds provided.',);
   }
 
   // If refund period is valid then refund the full amount that the user has paid

@@ -52,13 +52,15 @@ export const deleteCourseLecture = createAsyncThunk(
         `/courses/${courseId}/lectures/${lectureId}`
       );
       toast.success("Lecture deleted successfully");
-      return res.data.data.course.lectures; // Ensure the correct data path
+      return res.data.data.course.lectures;
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Failed to delete lecture");
-      return rejectWithValue(error?.response?.data?.message);
+      const errorMessage = error?.response?.data?.message || "Failed to delete lecture";
+      toast.error(errorMessage);
+      return rejectWithValue(errorMessage);
     }
   }
 );
+
 
 const lectureSlice = createSlice({
   name: "lecture",

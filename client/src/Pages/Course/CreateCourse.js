@@ -141,11 +141,11 @@ const CreateCourse = () => {
             {/* for course basic details */}
             <div className="space-y-6">
               <div
-                onClick={() =>
-                  !initialCourseData.newCourse
-                    ? toast.error("Cannot update thumbnail image")
-                    : ""
-                }
+                // onClick={() =>
+                //   !initialCourseData.newCourse
+                //     ? toast.error("Cannot update thumbnail image")
+                //     : ""
+                // }
               >
                 {/* input for image file */}
                 <label className="cursor-pointer" htmlFor="image_uploads">
