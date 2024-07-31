@@ -7,10 +7,11 @@ import sendEmail from '../utils/sendEmail.js';
 
 
 const Cookieoptions = {
+    domain : `${process.env.FRONTEND_URL}`,     
     httpOnly : false,
     secure : true ,
+    sameSite: 'Lax',
     maxAge : 7 * 24 * 60 * 60 * 1000 ,
-    sameSite: 'None',
 }
 
 //Register a user
