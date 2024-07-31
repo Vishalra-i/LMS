@@ -9,7 +9,7 @@ import sendEmail from '../utils/sendEmail.js';
 const Cookieoptions = {
     httpOnly : false,
     secure : true ,
-    sameSite: 'Lax',
+    sameSite: 'none',
     maxAge : 7 * 24 * 60 * 60 * 1000 ,
 }
 
