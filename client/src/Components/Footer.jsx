@@ -18,25 +18,25 @@ const Footer = () => {
         <section className="flex items-center justify-center gap-5 text-2xl text-white">
           <a
             className="hover:text-yellow-500 transition-all ease-in-out duration-300"
-            href="#"
+            href="https://github.com/"
           >
             <BsFacebook />
           </a>
           <a
             className="hover:text-yellow-500 transition-all ease-in-out duration-300"
-            href="#"
+            href="https://github.com/"
           >
             <BsInstagram />
           </a>
           <a
             className="hover:text-yellow-500 transition-all ease-in-out duration-300"
-            href="#"
+            href="https://github.com/"
           >
             <BsTwitter />
           </a>
           <a
             className="hover:text-yellow-500 transition-all ease-in-out duration-300"
-            href="#"
+            href="https://github.com/"
           >
             <BsLinkedin />
           </a>

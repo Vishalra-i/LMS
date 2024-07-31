@@ -4,12 +4,10 @@ import jwt from 'jsonwebtoken';
 import asynchandler  from '../utils/asynchandler.js';
 
 const isLoggedin = asynchandler(async (req,res,next)=>{
-       console.log(req.cookies.token)
-       console.log(req.headers)
        const token = req.cookies?.token || req.headers['Authorization']?.replace('Bearer ', '');
       
        if(!token){
-           return res.status(401).json({message: "Unauthorized request"})
+           return res.status(401).json(new ApiError(401, "Unauthorized request"))
        }
      
        const decodeToken = jwt.verify(token, process.env.JWT_SECRET)

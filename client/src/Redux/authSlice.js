@@ -84,7 +84,6 @@ export const logout = createAsyncThunk("auth/logout", async () => {
 export const getUserData = createAsyncThunk("/users/profile", async () => {
   try {
     const res = await axiosInstance.get("/users/profile");
-    console.log(res)
     return res?.data;
   } catch (error) {
     toast.error(error.message);
@@ -216,8 +215,7 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(createAccount.fulfilled, (state, action) => {
-        console.log('Signup Response:', action.payload ); // Debug log
-        const user = action?.payload?.data; // Adjusted path
+        const user = action?.payload?.data; 
         const role = user?.role;
         localStorage.setItem("data", JSON.stringify(user));
         localStorage.setItem("isLoggedIn", true);
@@ -227,7 +225,6 @@ const authSlice = createSlice({
         state.role = role;
       })
       .addCase(login.fulfilled, (state, action) => {
-        console.log('Login Response:', action.payload); // Debug log
         const user = action?.payload?.data; // Adjusted path
         const role = user?.role;
         localStorage.setItem("data", JSON.stringify(user));
@@ -248,7 +245,6 @@ const authSlice = createSlice({
         state.role = ""; // Ensure role is cleared on logout
       })
       .addCase(getUserData.fulfilled, (state, action) => {
-        console.log('User Data Response:', action.payload); 
         const user = action?.payload?.data; 
         const role = user?.role;
         localStorage.setItem("data", JSON.stringify(user));
@@ -259,7 +255,6 @@ const authSlice = createSlice({
         state.role = role;
       })
       .addCase(handlePaymentSuccess.fulfilled, (state, action) => {
-        console.log('Payment Success Response:', action.payload);
         const user = action.payload.data;
         const role = user?.role;
         localStorage.setItem("data", JSON.stringify(user));
