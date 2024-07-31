@@ -40,7 +40,7 @@ app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1', miscRoutes);
 
 app.get('/', (req, res) => {
-    res.send('Hello World!')
+    console.log('Cookies: ', req.cookies)
 })
 
 //404 handling
