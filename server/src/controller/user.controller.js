@@ -10,7 +10,6 @@ const Cookieoptions = {
     httpOnly : true,
     secure : true ,
     maxAge : 7 * 24 * 60 * 60 * 1000 ,
-    sameSite: 'None',
 }
 
 //Register a user
@@ -62,12 +61,11 @@ const register = asyncHandler(async (req,res)=>{
     const token = user.generateJwtToken()
    
     return res
-    .status(201)
+    .status(200)
     .cookie("token", token, Cookieoptions)
     .setHeader('Set-Cookie', `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=604800`)
-    .json(
-        new ApiResponse(201, {user}, "User registered successfully")
-    )
+    .json(new ApiResponse(200, user, "User regisered  successfully"));
+
 })
 
 //Login a user
@@ -102,10 +100,8 @@ const login = asyncHandler(async (req, res)=>{
     return res
     .status(200)
     .cookie("token", token, Cookieoptions)
-    .setHeader('Set-Cookie', `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=604800`)
-    .json(
-        new ApiResponse(200, user , "User logged in successfully")
-    )
+    .json(new ApiResponse(200, user, "User logged in successfully"));
+
 })
 
 //Logout user by clearing cookie
@@ -144,7 +140,8 @@ const profile = asyncHandler(async (req, res)=>{
 
 //Forgot password change by email thorough nodemailer
 const forgotpassword = asyncHandler(async (req, res)=>{
-     const {email} = req.body 
+     let {email} = req.body 
+     email = email?.toLowerCase()
 
      if(!email){
         throw new ApiError(404 , 'Please enter a email') ;
@@ -168,11 +165,11 @@ const forgotpassword = asyncHandler(async (req, res)=>{
         const message = `You can reset your password by clicking <a href=${resetPasswordUrl} target="_blank">Reset your password</a>\nIf the above link does not work for some reason then copy paste this link in new tab ${resetPasswordUrl}.\n If you have not requested this, kindly ignore.`;
         
         try {
-            await sendEmail({
+            await sendEmail(
                 email ,
                 subject ,
                 message 
-            })
+            )
             
          return res
                 .status(200)
