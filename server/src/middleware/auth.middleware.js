@@ -4,7 +4,9 @@ import jwt from 'jsonwebtoken';
 import asynchandler  from '../utils/asynchandler.js';
 
 const isLoggedin = asynchandler(async (req,res,next)=>{
-       const { token } = req.cookies;
+       console.log(req.cookies.token)
+       console.log(req.headers)
+       const token = req.cookies?.token || req.headers['Authorization']?.replace('Bearer ', '');
       
        if(!token){
            return res.status(401).json({message: "Unauthorized request"})
@@ -24,6 +26,8 @@ const isLoggedin = asynchandler(async (req,res,next)=>{
 
 
 export default isLoggedin;
+
+
 
 
 // Middleware to check if user has an active subscription or not

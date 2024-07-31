@@ -7,7 +7,6 @@ import sendEmail from '../utils/sendEmail.js';
 
 
 const Cookieoptions = {
-    domain : `${process.env.FRONTEND_URL}`,     
     httpOnly : false,
     secure : true ,
     sameSite: 'Lax',
@@ -61,10 +60,12 @@ const register = asyncHandler(async (req,res)=>{
     await user.save() ;
 
     const token = user.generateJwtToken()
+    
    
     return res
     .status(200)
     .cookie("token", token, Cookieoptions)
+    .setHeader("Authorization",`Bearer${token}`)
     .json(new ApiResponse(200, user, "User regisered  successfully"));
 })
 

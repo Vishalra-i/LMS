@@ -39,8 +39,7 @@ export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
 // function to handle login
 export const login = createAsyncThunk("auth/login", async (data) => {
   try {
-    let res = axiosInstance.post("/users/login", data);
-    
+    let res = axiosInstance.post("/users/login", data );
     await toast.promise(res, {
       loading: "Loading...",
       success: (data) => {
@@ -51,6 +50,7 @@ export const login = createAsyncThunk("auth/login", async (data) => {
 
     // getting response resolved here
     res = await res;
+    let token =  document.cookie ;
     return res.data;
   } catch (error) {
     toast.error(error.message);

@@ -1,10 +1,21 @@
-import axios from "axios";
+import axios from 'axios';
 
-const BASE_URL = `${process.env.REACT_APP_SERVER_URL}/api/v1`;
+const baseURL = `${process.env.REACT_APP_SERVER_URL}/api/v1`
 
-const axiosInstance = axios.create()
+const axiosInstance = axios.create({
+  baseURL,
+  withCredentials: true // For handling cookies (if needed)
+});
 
-axiosInstance.defaults.baseURL = BASE_URL;
-axiosInstance.defaults.withCredentials = true;
+axiosInstance.interceptors.request.use(config => {
+  const token = localStorage.getItem('token'); // Replace with your token storage logic
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 
 export default axiosInstance;
+
+
