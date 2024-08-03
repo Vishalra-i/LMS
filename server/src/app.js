@@ -11,7 +11,7 @@ import morgan from 'morgan';
 const app = express()
 app.use(cors(
     {
-        origin: [process.env.FRONTEND_URL],
+        origin: [process.env.FRONTEND_URL , process.env.FRONTEND_URL2],
         credentials: true ,
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
