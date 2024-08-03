@@ -65,7 +65,6 @@ const register = asyncHandler(async (req,res)=>{
     return res
     .status(200)
     .cookie("token", token, Cookieoptions)
-    .setHeader("Authorization",`Bearer${token}`)
     .json(new ApiResponse(200, user, "User regisered  successfully"));
 })
 

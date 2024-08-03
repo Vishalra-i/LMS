@@ -60,6 +60,7 @@ export const createCourse = asyncHandler(async (req, res, next) => {
  */
 export const getLecturesByCourseId = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
+  
 
   const course = await Course.findById(id);
 
