@@ -6,6 +6,7 @@ import courseRouter from './routes/course.route.js';
 import paymentRoutes from './routes/payment.route.js';
 import miscRoutes from './routes/miscellaneous.route.js';
 import morgan from 'morgan';
+import path from 'path';
 
 
 const app = express()
@@ -40,7 +41,7 @@ app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1', miscRoutes);
 
 app.get('/', (req, res) => {
-    console.log('Cookies: ', req.cookies)
+    res.sendFile(path.join(__dirname, './index.html'));
 })
 
 //404 handling

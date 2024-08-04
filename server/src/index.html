@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS API Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h2 {
+            color: #444;
+            margin-top: 40px;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .endpoint {
+            margin-bottom: 30px;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: #fff;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .method.get {
+            background-color: #28a745;
+        }
+
+        .method.post {
+            background-color: #007bff;
+        }
+
+        .method.put {
+            background-color: #ffc107;
+        }
+
+        .method.delete {
+            background-color: #dc3545;
+        }
+
+        .description {
+            font-style: italic;
+            color: #666;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LMS API Documentation</h1>
+
+        <!-- User Routes -->
+        <h2>User Routes</h2>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/api/v1/users/register</code>
+            <p class="description">Register a new user.</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/api/v1/users/login</code>
+            <p class="description">Log in a user.</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <code>/api/v1/users/profile</code>
+            <p class="description">Get user profile data (requires authentication).</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <code>/api/v1/users/logout</code>
+            <p class="description">Log out the current user.</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/api/v1/users/forgot-password</code>
+            <p class="description">Request a password reset.</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/api/v1/users/reset/:resetToken</code>
+            <p class="description">Reset the user's password using the reset token.</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method put">PUT</span>
+            <code>/api/v1/users/update/:id</code>
+            <p class="description">Update user profile information (requires authentication).</p>
+        </div>
+
+        <!-- Course Routes -->
+        <h2>Course Routes</h2>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <code>/api/v1/courses</code>
+            <p class="description">Retrieve all courses.</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/api/v1/courses</code>
+            <p class="description">Create a new course (Admin only).</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <code>/api/v1/courses/:id</code>
+            <p class="description">Get lectures for a specific course (requires subscription).</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/api/v1/courses/:id</code>
+            <p class="description">Add a lecture to a course (Admin only).</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method put">PUT</span>
+            <code>/api/v1/courses/:id</code>
+            <p class="description">Update a course's information (Admin only).</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method delete">DELETE</span>
+            <code>/api/v1/courses/:courseId/lectures/:lectureId</code>
+            <p class="description">Remove a lecture from a course (Admin only).</p>
+        </div>
+
+        <!-- Payment Routes -->
+        <h2>Payment Routes</h2>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/api/v1/payments/subscribe</code>
+            <p class="description">Subscribe to a course (requires authentication).</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/api/v1/payments/verify</code>
+            <p class="description">Verify subscription payment (requires authentication).</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/api/v1/payments/unsubscribe</code>
+            <p class="description">Unsubscribe from a course (requires authentication).</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <code>/api/v1/payments/razorpay-key</code>
+            <p class="description">Get the Razorpay API key for payments (requires authentication).</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <code>/api/v1/payments</code>
+            <p class="description">Retrieve all payments (Admin only).</p>
+        </div>
+
+        <!-- Miscellaneous Routes -->
+        <h2>Miscellaneous Routes</h2>
+
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/api/v1/contact</code>
+            <p class="description">Send a contact message.</p>
+        </div>
+
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <code>/api/v1/admin/stats/users</code>
+            <p class="description">Get user statistics (Admin only).</p>
+        </div>
+
+    </div>
+</body>
+</html>
