@@ -7,10 +7,10 @@ import sendEmail from '../utils/sendEmail.js';
 
 
 const Cookieoptions = {
-    httpOnly : false,
-    secure : true ,
-    sameSite: 'none',
-    maxAge : 7 * 24 * 60 * 60 * 1000 ,
+    httpOnly: true,       // Cookie cannot be accessed by client-side JavaScript
+    secure: process.env.NODE_ENV === 'production',  // Set true only in production (requires HTTPS)
+    sameSite: 'Strict',   // Options: Strict, Lax, None
+    maxAge: 1000 * 60 * 60 * 24 // Cookie expiration time (1 day here)
 }
 
 //Register a user
