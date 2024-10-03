@@ -5,8 +5,8 @@ import asyncHandler from '../utils/asynchandler.js';
 
 const isLoggedin = asyncHandler(async (req, res, next) => {
     const token = req.cookies.accessToken;
-    console.log("token::" + req.cookie);
-    console.log("tokens::" + req.cookies);
+    // console.log("token::" + req?.cookie);
+    console.log("tokens::" + req?.cookies);
     console.log("token here::" + token);
     if (!token) {
         return res.status(401).json(new ApiError(401, "Unauthorized request"));
