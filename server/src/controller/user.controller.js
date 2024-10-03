@@ -9,7 +9,7 @@ import sendEmail from '../utils/sendEmail.js';
 const Cookieoptions = {
     httpOnly: true,       // Cookie cannot be accessed by client-side JavaScript
     secure: process.env.NODE_ENV === 'production',  // Set true only in production (requires HTTPS)
-    sameSite: 'Lax',   // Options: Strict, Lax, None
+    sameSite: 'None',   // Options: Strict, Lax, None
     maxAge: 1000 * 60 * 60 * 24 // Cookie expiration time (1 day here)
 }
 
