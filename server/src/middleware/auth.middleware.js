@@ -4,8 +4,7 @@ import jwt from 'jsonwebtoken';
 import asyncHandler from '../utils/asynchandler.js';
 
 const isLoggedin = asyncHandler(async (req, res, next) => {
-    const token = req.cookies.accessToken;
-    // console.log("token::" + req?.cookie);
+    const token = req.cookies.accessToken ? req.cookies.accessToken.toString() : null;    
     console.log("tokens::" + req?.cookies);
     console.log("token here::" + token);
     if (!token) {
