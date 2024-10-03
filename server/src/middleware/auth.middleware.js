@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import asyncHandler from '../utils/asynchandler.js';
 
 const isLoggedin = asyncHandler(async (req, res, next) => {
-    const token = req.cookies?.token;
+    const token = req.cookies.accessToken;
     if (!token) {
         return res.status(401).json(new ApiError(401, "Unauthorized request"));
     }
