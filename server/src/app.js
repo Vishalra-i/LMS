@@ -29,7 +29,7 @@ const __dirname = path.dirname(__filename);
 
 // Routes
 app.use('/ping', (req, res) => {
-    res.send('/pong');
+    res.send('/pong1');
 });
 
 // User routes
