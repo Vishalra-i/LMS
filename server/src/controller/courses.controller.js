@@ -1,18 +1,7 @@
-import asyncHandler from '../utils/asynchandler.js';
-import Course from '../model/courses.model.js';
-import { ApiError } from '../utils/ApiError.js';
-import ApiResponse from '../utils/ApiResponse.js';
-import { deleteOnCloudnary, uploadOnCloudinary } from '../utils/cloudinary.js';
-
-/**
- * @ALL_COURSES
- * @ROUTE @GET {{URL}}/api/v1/courses
- * @ACCESS Public
- */
-export const getAllCourses = asyncHandler(async (_req, res, next) => {
-  const courses = await Course.find({}).select('-lectures');
-  res.status(200).json(new ApiResponse(200, { courses }, 'All courses fetched successfully'));
-});
+import { promisify } from 'util';
+import fs from 'fs';
+import path from 'path';
+const unlinkFile = promisify(fs.unlink);
 
 /**
  * @CREATE_COURSE
@@ -26,50 +15,53 @@ export const createCourse = asyncHandler(async (req, res, next) => {
     throw new ApiError(400, 'All fields are required');
   }
 
-  
-
   const course = await Course.create({ title, description, category, createdBy });
 
-  if (!course) {
-    throw new ApiError(400, 'Course could not be created, please try again');
-  }
-
   if (req.file) {
-    try {
-      const result = await uploadOnCloudinary(req.file.path);
-      if (result) {
+    // Handle Cloudinary file upload in the background
+    uploadOnCloudinary(req.file.path)
+      .then(async (result) => {
         course.thumbnail.public_id = result.public_id;
         course.thumbnail.secure_url = result.secure_url;
-      }
-    } catch (error) {
-      for (const file of await fs.readdir('uploads/')) {
-        await fs.unlink(path.join('uploads/', file));
-      }
-      throw new ApiError(400, 'File not uploaded, please try again');
-    }
+        await course.save();
+        await unlinkFile(req.file.path); // Clean up the uploaded file
+      })
+      .catch((error) => {
+        console.error('Cloudinary Upload Failed:', error);
+      });
   }
 
-  await course.save();
   res.status(201).json(new ApiResponse(201, { course }, 'Course created successfully'));
 });
 
+
 /**
- * @GET_LECTURES_BY_COURSE_ID
- * @ROUTE @POST {{URL}}/api/v1/courses/:id
- * @ACCESS Private(ADMIN, subscribed users only)
+ * @ALL_COURSES
+ * @ROUTE @GET {{URL}}/api/v1/courses
+ * @ACCESS Public
  */
-export const getLecturesByCourseId = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  
-
-  const course = await Course.findById(id);
-
-  if (!course) {
-    throw new ApiError(404, 'Invalid course id or course not found.');
-  }
-
-  res.status(200).json(new ApiResponse(200, { lectures: course.lectures }, 'Course lectures fetched successfully'));
+export const getAllCourses = asyncHandler(async (req, res, next) => {
+ try {
+   const page = parseInt(req.query.page) || 1;
+   const limit = parseInt(req.query.limit) || 10;  // Default to 10 courses per page
+   const skip = (page - 1) * limit;
+ 
+   const courses = await Course.find({})
+     .select('-lectures')
+     .skip(skip)
+     .limit(limit);
+ 
+   const totalCourses = await Course.countDocuments();
+ 
+   res.status(200).json(
+     new ApiResponse(200, { courses, totalPages: Math.ceil(totalCourses / limit), currentPage: page }, 'Courses fetched successfully')
+   );
+ } catch (error) {
+   console.error('Error fetching courses:', error);
+   throw new ApiError(500, 'Internal server error');
+ }
 });
+
 
 /**
  * @ADD_LECTURE
@@ -93,20 +85,33 @@ export const addLectureToCourseById = asyncHandler(async (req, res, next) => {
   let lectureData = {};
 
   if (req.file) {
-      const result = await uploadOnCloudinary( req.file.path);
-      console.log(result)
-      if (result) {
-        lectureData.public_id = result.public_id;
-        lectureData.secure_url = result.secure_url;
-      }
-    
-  }
-  course.lectures.push({ title, description, lecture: lectureData });
-  course.numberOfLectures = course.lectures.length;
-  await course.save();
+    // Handle Cloudinary file upload in the background
+    uploadOnCloudinary(req.file.path)
+      .then(async (result) => {
+        if (result) {
+          lectureData.public_id = result.public_id;
+          lectureData.secure_url = result.secure_url;
+        }
 
-  res.status(200).json(new ApiResponse(200, { course }, 'Course lecture added successfully'));
+        course.lectures.push({ title, description, lecture: lectureData });
+        course.numberOfLectures = course.lectures.length;
+        await course.save();
+
+        res.status(200).json(new ApiResponse(200, { course }, 'Lecture added successfully'));
+      })
+      .catch((error) => {
+        console.error('Cloudinary Upload Failed:', error);
+        throw new ApiError(400, 'File upload failed, please try again');
+      });
+  } else {
+    course.lectures.push({ title, description });
+    course.numberOfLectures = course.lectures.length;
+    await course.save();
+
+    res.status(200).json(new ApiResponse(200, { course }, 'Lecture added successfully'));
+  }
 });
+
 
 /**
  * @Remove_LECTURE
@@ -123,60 +128,33 @@ export const removeLectureFromCourse = asyncHandler(async (req, res, next) => {
   const course = await Course.findById(courseId);
 
   if (!course) {
-    throw new ApiError(404, 'Invalid ID or Course does not exist.');
+    throw new ApiError(404, 'Invalid course id or course not found.');
   }
 
-  const lectureIndex = course.lectures.findIndex(lecture => lecture._id.toString() === lectureId.toString());
+  const lectureIndex = course.lectures.findIndex(
+    (lecture) => lecture._id.toString() === lectureId.toString()
+  );
 
   if (lectureIndex === -1) {
     throw new ApiError(404, 'Lecture does not exist.');
   }
 
-  
-  const result = await deleteOnCloudnary(course.lectures[lectureIndex].lecture.public_id);
-  if (!result) {
-    throw new ApiError(400, 'File not deleted, please try again');
-  }
-  course.lectures.splice(lectureIndex, 1);
-  course.numberOfLectures = course.lectures.length;
-  await course.save();
+  const lecture = course.lectures[lectureIndex];
 
-  res
-  .status(200)
-  .json(new ApiResponse(200, {}, 'Course lecture removed successfully'));
+  // Remove lecture from Cloudinary in background
+  deleteOnCloudnary(lecture.lecture.public_id)
+    .then(() => {
+      course.lectures.splice(lectureIndex, 1);
+      course.numberOfLectures = course.lectures.length;
+      return course.save();
+    })
+    .then(() => {
+      res.status(200).json(new ApiResponse(200, {}, 'Lecture removed successfully'));
+    })
+    .catch((error) => {
+      console.error('Cloudinary Deletion Failed:', error);
+      throw new ApiError(400, 'File deletion failed, please try again');
+    });
 });
 
-/**
- * @UPDATE_COURSE_BY_ID
- * @ROUTE @PUT {{URL}}/api/v1/courses/:id
- * @ACCESS Private (Admin only)
- */
-export const updateCourseById = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
 
-  const course = await Course.findByIdAndUpdate(id, { $set: req.body }, { runValidators: true });
-
-  if (!course) {
-    throw new ApiError(400, 'Invalid course id or course not found.');
-  }
-
-  res.status(200).json(new ApiResponse(200, {}, 'Course updated successfully'));
-});
-
-/**
- * @DELETE_COURSE_BY_ID
- * @ROUTE @DELETE {{URL}}/api/v1/courses/:id
- * @ACCESS Private (Admin only)
- */
-export const deleteCourseById = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-
-  const course = await Course.findById(id);
-
-  if (!course) {
-    throw new ApiError(404, 'Course with given id does not exist.');
-  }
-
-  await course.remove();
-  res.status(200).json(new ApiResponse(200, {}, 'Course deleted successfully'));
-});
